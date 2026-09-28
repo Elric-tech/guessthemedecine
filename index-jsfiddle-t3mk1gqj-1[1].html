@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html>
+
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>JSFiddle t3mk1gqj</title>
+
+  <style>
+    
+  </style>
+
+  
+</head>
+<body>
+  <!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Questions pour un Champion - Édition Médicaments</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    @keyframes pulse-red {
+      0%, 100% { background-color: rgba(225, 29, 72, 0.2); border-color: #f43f5e; }
+      50% { background-color: rgba(225, 29, 72, 0.6); border-color: #fda4af; }
+    }
+    .flash-danger {
+      animation: pulse-red 0.4s infinite;
+    }
+    .gold-glow {
+      text-shadow: 0 0 15px rgba(251, 191, 36, 0.6);
+    }
+    .card-glow {
+      box-shadow: 0 0 25px rgba(245, 158, 11, 0.25);
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-b from-slate-950 via-blue-950 to-slate-950 text-white min-h-screen flex flex-col justify-between p-4 font-sans selection:bg-amber-400 selection:text-black">
+
+  <!-- Header TV Style -->
+  <header class="text-center py-3 border-b border-amber-500/30">
+    <div class="inline-block px-4 py-1 rounded-full bg-amber-500/10 border border-amber-500/40 text-amber-300 text-xs font-bold tracking-widest uppercase mb-1">
+      🎬 PLATEAU TV INTERACTIF
+    </div>
+    <h1 class="text-2xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500 gold-glow">
+      QUESTIONS POUR UN CHAMPION
+    </h1>
+    <p class="text-blue-300 text-xs sm:text-sm mt-1">Édition spéciale : Devine le médicament !</p>
+  </header>
+
+  <!-- Control Son -->
+  <div class="fixed top-4 right-4 z-50">
+    <button id="sound-toggle" onclick="toggleSound()" class="p-2 bg-slate-800/80 hover:bg-slate-700 border border-amber-500/50 rounded-full text-amber-400 shadow-lg transition-all text-xs flex items-center gap-1">
+      <span id="sound-icon">🔊</span> <span id="sound-text" class="hidden sm:inline">Son On</span>
+    </button>
+  </div>
+
+  <!-- Main Area -->
+  <main class="max-w-md w-full mx-auto my-auto flex-grow flex flex-col justify-center py-4">
+
+    <!-- Ecran de démarrage (Saisie Pseudo) -->
+    <div id="start-screen" class="text-center space-y-5">
+      <div class="bg-slate-900/90 p-6 rounded-3xl border-2 border-amber-500/40 card-glow backdrop-blur-md space-y-4">
+        <div class="text-5xl animate-bounce">🏆</div>
+        <h2 class="text-2xl font-black text-amber-300">ENTREZ EN PISTE !</h2>
+        <p class="text-slate-300 text-xs sm:text-sm leading-relaxed">
+          10 questions express • <span class="text-amber-400 font-bold">10s par question</span>.
+        </p>
+        
+        <!-- Champ Pseudo -->
+        <div class="text-left space-y-1 pt-2">
+          <label for="player-name" class="text-xs font-bold text-amber-400 uppercase tracking-wider block">Votre Pseudo / Nom :</label>
+          <input type="text" id="player-name" placeholder="Ex: Champion2026" maxlength="15" class="w-full px-4 py-3 bg-slate-950 border-2 border-amber-500/50 rounded-xl text-white font-bold placeholder-slate-500 focus:outline-none focus:border-amber-400 text-center text-lg">
+        </div>
+      </div>
+
+      <button onclick="validateAndStart()" class="w-full py-4 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 hover:from-amber-400 hover:to-yellow-300 text-slate-950 font-black text-xl rounded-2xl shadow-xl transform active:scale-95 transition-all gold-glow">
+        LANCER LE DÉFI ! 🚀
+      </button>
+    </div>
+
+    <!-- Plateau de jeu -->
+    <div id="game-screen" class="hidden space-y-4">
+      
+      <!-- Barre d'infos & Chrono -->
+      <div id="timer-box" class="flex items-center justify-between bg-slate-900/80 p-3 rounded-2xl border border-amber-500/30 transition-all">
+        <div class="text-xs font-black text-slate-400">
+          QUESTION <br><span id="current-question-num" class="text-amber-400 text-xl">1</span><span class="text-slate-500">/10</span>
+        </div>
+
+        <!-- Chrono central TV -->
+        <div class="relative w-16 h-16 flex items-center justify-center">
+          <svg class="w-16 h-16 transform -rotate-90">
+            <circle cx="32" cy="32" r="26" stroke="currentColor" stroke-width="6" class="text-slate-800" fill="transparent"/>
+            <circle id="timer-circle" cx="32" cy="32" r="26" stroke="currentColor" stroke-width="6" class="text-amber-400 transition-all duration-100" stroke-dasharray="163" stroke-dashoffset="0" fill="transparent"/>
+          </svg>
+          <span id="timer-text" class="absolute text-xl font-black text-amber-300">10</span>
+        </div>
+
+        <div class="text-xs font-black text-slate-400 text-right">
+          SCORE <br><span id="current-score" class="text-emerald-400 text-xl">0</span>
+        </div>
+      </div>
+
+      <!-- Emoji Display -->
+      <div id="emoji-card" class="bg-gradient-to-b from-blue-900/60 to-slate-900/90 p-6 sm:p-8 rounded-3xl border-2 border-amber-500/50 text-center shadow-2xl relative overflow-hidden card-glow">
+        <div id="emoji-display" class="text-5xl sm:text-6xl tracking-widest py-2">
+          ⚔️🦠💊
+        </div>
+      </div>
+
+      <!-- Choix de réponses -->
+      <div id="options-container" class="grid grid-cols-1 gap-2.5"></div>
+    </div>
+
+    <!-- Ecran Finale, Classement & QR Code -->
+    <div id="result-screen" class="hidden text-center space-y-5">
+      <div class="bg-slate-900/90 p-5 rounded-3xl border-2 border-amber-500/50 card-glow space-y-4">
+        <h2 class="text-xl font-black text-amber-400">RÉSULTAT DE <span id="display-player-name" class="underline"></span></h2>
+        
+        <div class="text-4xl font-black text-white py-1">
+          <span id="final-score" class="text-amber-300 gold-glow">0</span> <span class="text-lg text-slate-400">/ 10</span>
+        </div>
+        
+        <p id="score-message" class="text-slate-200 font-bold text-xs sm:text-sm"></p>
+
+        <!-- Tableau du Classement (Leaderboard) -->
+        <div class="pt-3 border-t border-slate-800 text-left">
+          <h3 class="text-xs font-black text-amber-400 uppercase tracking-wider mb-2 text-center">🏆 CLASSEMENT DES CHAMPIONS</h3>
+          <div class="bg-slate-950/80 rounded-xl p-2 border border-slate-800 max-h-36 overflow-y-auto">
+            <table class="w-full text-xs text-left">
+              <thead>
+                <tr class="text-slate-400 border-b border-slate-800 pb-1">
+                  <th class="py-1 px-2">#</th>
+                  <th class="py-1 px-2">Joueur</th>
+                  <th class="py-1 px-2 text-right">Score</th>
+                </tr>
+              </thead>
+              <tbody id="leaderboard-body" class="divide-y divide-slate-800/50">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- QR Code -->
+        <div class="pt-3 border-t border-slate-800 flex flex-col items-center">
+          <p class="text-[10px] font-bold text-amber-400/80 mb-2 uppercase tracking-wider">Scanne pour défier tes amis :</p>
+          <div id="qrcode" class="p-2 bg-white rounded-xl shadow-xl"></div>
+        </div>
+      </div>
+
+      <button onclick="resetToStart()" class="w-full py-3.5 bg-slate-800 hover:bg-slate-700 border border-amber-500/50 text-amber-300 font-black text-base rounded-2xl transition-all shadow-lg active:scale-95">
+        🔄 NOUVEAU JOUEUR / REJOUER
+      </button>
+    </div>
+
+  </main>
+
+  <!-- Audio Engine (WebAudio API) -->
+  <script>
+    let audioCtx = null;
+    let isSoundOn = true;
+    let musicInterval = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function toggleSound() {
+      isSoundOn = !isSoundOn;
+      document.getElementById('sound-icon').textContent = isSoundOn ? '🔊' : '🔇';
+      document.getElementById('sound-text').textContent = isSoundOn ? 'Son On' : 'Son Off';
+      if (!isSoundOn) stopBackgroundMusic();
+    }
+
+    function playBeep(pitch = 440, duration = 0.08) {
+      if (!isSoundOn || !audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = pitch;
+      gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    }
+
+    function playSuccessSound() {
+      if (!isSoundOn || !audioCtx) return;
+      const now = audioCtx.currentTime;
+      [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.1, now + idx * 0.08);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.15);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now + idx * 0.08);
+        osc.stop(now + idx * 0.08 + 0.15);
+      });
+    }
+
+    function playErrorSound() {
+      if (!isSoundOn || !audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(180, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 0.3);
+      gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.3);
+    }
+
+    function startBackgroundMusic() {
+      if (!isSoundOn || !audioCtx) return;
+      stopBackgroundMusic();
+      let step = 0;
+      musicInterval = setInterval(() => {
+        if (!isSoundOn) return;
+        const baseFreq = (step % 2 === 0) ? 110 : 116.54;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.value = baseFreq;
+        gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.25);
+        step++;
+      }, 400);
+    }
+
+    function stopBackgroundMusic() {
+      if (musicInterval) clearInterval(musicInterval);
+    }
+  </script>
+
+  <!-- Game & Leaderboard Logic -->
+  <script>
+    const questionsData = [
+      { emojis: "⚔️🦠💊", answer: "Antibiotique", options: ["Antibiotique", "Antiseptique", "Antihistaminique", "Paracétamol"] },
+      { emojis: "⚔️🦠🧴", answer: "Antiseptique", options: ["Antibiotique", "Antiseptique", "Insuline", "Somnifère"] },
+      { emojis: "❌🤮🤢", answer: "Antiémétique", options: ["Antidépresseur", "Bronchodilatateur", "Antiémétique", "Vaccin"] },
+      { emojis: "🛡️💉💪", answer: "Vaccin", options: ["Vaccin", "Insuline", "Antibiotique", "Somnifère"] },
+      { emojis: "💉🩸🍬⬇️", answer: "Insuline", options: ["Paracétamol", "Insuline", "Antihistaminique", "Antiémétique"] },
+      { emojis: "💊😴💤", answer: "Somnifère", options: ["Somnifère", "Antidépresseur", "Bronchodilatateur", "Vaccin"] },
+      { emojis: "😵‍💫🤒🌡️📉", answer: "Paracétamol", options: ["Paracétamol", "Antiseptique", "Insuline", "Antibiotique"] },
+      { emojis: "🌸🤧😢", answer: "Antihistaminique", options: ["Antihistaminique", "Antiémétique", "Somnifère", "Bronchodilatateur"] },
+      { emojis: "🌧️😔💊😃☀️", answer: "Antidépresseur", options: ["Paracétamol", "Antidépresseur", "Vaccin", "Antiseptique"] },
+      { emojis: "🫁😰💨", answer: "Ventoline / Bronchodilatateur", options: ["Ventoline / Bronchodilatateur", "Antihistaminique", "Insuline", "Somnifère"] }
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let timer = 10;
+    let timerInterval = null;
+    let playerName = "";
+    const TIME_LIMIT = 10;
+
+    function validateAndStart() {
+      const input = document.getElementById('player-name');
+      playerName = input.value.trim();
+      if (!playerName) {
+        alert("Veuillez saisir un pseudo pour jouer !");
+        return;
+      }
+      startGame();
+    }
+
+    function resetToStart() {
+      document.getElementById('result-screen').classList.add('hidden');
+      document.getElementById('start-screen').classList.remove('hidden');
+    }
+
+    function startGame() {
+      initAudio();
+      currentQuestionIndex = 0;
+      score = 0;
+      document.getElementById('start-screen').classList.add('hidden');
+      document.getElementById('result-screen').classList.add('hidden');
+      document.getElementById('game-screen').classList.remove('hidden');
+      showQuestion();
+    }
+
+    function showQuestion() {
+      clearInterval(timerInterval);
+      startBackgroundMusic();
+      
+      const q = questionsData[currentQuestionIndex];
+      document.getElementById('current-question-num').textContent = currentQuestionIndex + 1;
+      document.getElementById('current-score').textContent = score;
+      document.getElementById('emoji-display').textContent = q.emojis;
+
+      const shuffledOptions = [...q.options].sort(() => Math.random() - 0.5);
+      const optionsContainer = document.getElementById('options-container');
+      optionsContainer.innerHTML = '';
+
+      shuffledOptions.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = "w-full py-3 px-4 bg-slate-900/90 hover:bg-amber-500/20 border-2 border-amber-500/40 text-left font-extrabold text-sm rounded-2xl transition-all shadow-lg flex items-center justify-between text-slate-100 hover:border-amber-400 active:scale-98";
+        btn.innerHTML = `<span>${opt}</span> <span class="text-amber-400 text-base">➔</span>`;
+        btn.onclick = () => handleAnswer(opt, btn);
+        optionsContainer.appendChild(btn);
+      });
+
+      startTimer();
+    }
+
+    function startTimer() {
+      timer = TIME_LIMIT;
+      updateTimerUI();
+
+      timerInterval = setInterval(() => {
+        timer -= 0.1;
+        if (timer <= 0) {
+          timer = 0;
+          updateTimerUI();
+          clearInterval(timerInterval);
+          stopBackgroundMusic();
+          playErrorSound();
+          handleTimeout();
+        } else {
+          updateTimerUI();
+        }
+      }, 100);
+    }
+
+    function updateTimerUI() {
+      const timerText = document.getElementById('timer-text');
+      const timerCircle = document.getElementById('timer-circle');
+      const timerBox = document.getElementById('timer-box');
+      
+      const secondsLeft = Math.ceil(timer);
+      timerText.textContent = secondsLeft;
+
+      const maxOffset = 163;
+      const offset = maxOffset - (timer / TIME_LIMIT) * maxOffset;
+      timerCircle.style.strokeDashoffset = offset;
+
+      if (timer <= 3 && timer > 0) {
+        timerText.classList.remove('text-amber-300');
+        timerText.classList.add('text-red-500');
+        timerCircle.classList.remove('text-amber-400');
+        timerCircle.classList.add('text-red-500');
+        timerBox.classList.add('flash-danger');
+        
+        if (Math.abs(timer % 0.5) < 0.09) {
+          playBeep(880, 0.05);
+        }
+      } else {
+        timerText.classList.add('text-amber-300');
+        timerText.classList.remove('text-red-500');
+        timerCircle.classList.add('text-amber-400');
+        timerCircle.classList.remove('text-red-500');
+        timerBox.classList.remove('flash-danger');
+      }
+    }
+
+    function handleAnswer(selectedOption, buttonEl) {
+      clearInterval(timerInterval);
+      stopBackgroundMusic();
+      disableButtons();
+
+      const q = questionsData[currentQuestionIndex];
+      if (selectedOption === q.answer) {
+        score++;
+        playSuccessSound();
+        buttonEl.classList.remove('bg-slate-900/90', 'border-amber-500/40');
+        buttonEl.classList.add('bg-emerald-600', 'border-emerald-400', 'text-white', 'scale-102');
+      } else {
+        playErrorSound();
+        buttonEl.classList.remove('bg-slate-900/90', 'border-amber-500/40');
+        buttonEl.classList.add('bg-rose-600', 'border-rose-400', 'text-white');
+        highlightCorrectAnswer();
+      }
+
+      setTimeout(nextQuestion, 1200);
+    }
+
+    function handleTimeout() {
+      disableButtons();
+      highlightCorrectAnswer();
+      setTimeout(nextQuestion, 1200);
+    }
+
+    function highlightCorrectAnswer() {
+      const q = questionsData[currentQuestionIndex];
+      const buttons = document.getElementById('options-container').querySelectorAll('button');
+      buttons.forEach(btn => {
+        if (btn.textContent.includes(q.answer)) {
+          btn.classList.remove('bg-slate-900/90', 'border-amber-500/40');
+          btn.classList.add('bg-emerald-600/80', 'border-emerald-400', 'text-white');
+        }
+      });
+    }
+
+    function disableButtons() {
+      const buttons = document.getElementById('options-container').querySelectorAll('button');
+      buttons.forEach(btn => btn.disabled = true);
+    }
+
+    function nextQuestion() {
+      currentQuestionIndex++;
+      if (currentQuestionIndex < questionsData.length) {
+        showQuestion();
+      } else {
+        showResults();
+      }
+    }
+
+    function showResults() {
+      document.getElementById('game-screen').classList.add('hidden');
+      document.getElementById('result-screen').classList.remove('hidden');
+
+      document.getElementById('display-player-name').textContent = playerName;
+      document.getElementById('final-score').textContent = score;
+
+      const messageEl = document.getElementById('score-message');
+      if (score === 10) {
+        messageEl.textContent = "🏆 SUPER CHAMPION ! Parcours parfait !";
+        playSuccessSound();
+      } else if (score >= 7) {
+        messageEl.textContent = "👏 EXCELLENT SCORE ! Très impressionnant !";
+      } else if (score >= 5) {
+        messageEl.textContent = "👍 PAS MAL ! Vous avez de bonnes connaissances.";
+      } else {
+        messageEl.textContent = "💪 ENTRAÎNEZ-VOUS ENCORE pour remonter au classement !";
+      }
+
+      saveAndRenderLeaderboard(playerName, score);
+      generateQRCode();
+    }
+
+    // Gestion du Classement (Leaderboard)
+    function saveAndRenderLeaderboard(name, newScore) {
+      let scores = JSON.parse(localStorage.getItem('quiz_leaderboard') || '[]');
+      
+      // Ajouter la nouvelle partie
+      scores.push({ name: name, score: newScore, date: new Date().getTime() });
+      
+      // Trier : score décroissant
+      scores.sort((a, b) => b.score - a.score);
+      
+      // Garder les 10 meilleurs
+      scores = scores.slice(0, 10);
+      
+      // Sauvegarder dans LocalStorage
+      localStorage.setItem('quiz_leaderboard', JSON.stringify(scores));
+
+      // Afficher dans la table
+      const tbody = document.getElementById('leaderboard-body');
+      tbody.innerHTML = '';
+
+      scores.forEach((item, index) => {
+        const tr = document.createElement('tr');
+        const isCurrentPlayer = item.name === name && item.score === newScore;
+        
+        let medal = `#${index + 1}`;
+        if (index === 0) medal = "🥇";
+        if (index === 1) medal = "🥈";
+        if (index === 2) medal = "🥉";
+
+        tr.className = isCurrentPlayer ? "bg-amber-500/20 text-amber-300 font-bold" : "text-slate-300";
+        tr.innerHTML = `
+          <td class="py-1 px-2 font-black">${medal}</td>
+          <td class="py-1 px-2 truncate max-w-[120px]">${escapeHtml(item.name)}</td>
+          <td class="py-1 px-2 text-right font-black text-amber-400">${item.score}/10</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function escapeHtml(text) {
+      return text.replace(/[&<>"']/g, function(m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+      });
+    }
+
+    function generateQRCode() {
+      const qrContainer = document.getElementById('qrcode');
+      qrContainer.innerHTML = '';
+      new QRCode(qrContainer, {
+        text: window.location.href,
+        width: 110,
+        height: 110,
+        colorDark : "#020617",
+        colorLight : "#ffffff",
+        correctLevel : QRCode.CorrectLevel.H
+      });
+    }
+  </script>
+</body>
+</html>
+
+  <script>
+    
+  </script>
+</body>
+</html>
